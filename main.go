@@ -1,18 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+)
 
-type divideError struct {
-	dividend float64
-}
-
-func (d divideError) Error() string {
-	return fmt.Sprintf("can not divide %v by zero", d.dividend)
-}
-
-func divide(dividend, divisor float64) (float64, error) {
-	if divisor == 0 {
-		return 0, divideError{dividend: dividend}
+func divide(x, y float64) (float64, error) {
+	if y == 0 {
+		return 0, errors.New("no dividing by 0")
 	}
-	return dividend / divisor, nil
+	return x / y, nil
 }
