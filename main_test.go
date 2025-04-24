@@ -7,21 +7,57 @@ import (
 
 func Test(t *testing.T) {
 	type testCase struct {
-		body           string
-		isSubscribed   bool
-		expectedCost   int
-		expectedFormat string
+		expense      expense
+		expectedTo   string
+		expectedCost float64
 	}
 
 	runCases := []testCase{
-		{"hello there", true, 22, "'hello there' | Subscribed"},
-		{"general kenobi", false, 70, "'general kenobi' | Not Subscribed"},
+		{
+			email{isSubscribed: true, body: "Whoa there!", toAddress: "soldier@monty.com"},
+			"soldier@monty.com",
+			0.11,
+		},
+		{
+			sms{isSubscribed: false, body: "Halt! Who goes there?", toPhoneNumber: "+155555509832"},
+			"+155555509832",
+			2.1,
+		},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{"i hate sand", true, 22, "'i hate sand' | Subscribed"},
-		{"it's coarse and rough and irritating", false, 180, "'it's coarse and rough and irritating' | Not Subscribed"},
-		{"and it gets everywhere", true, 44, "'and it gets everywhere' | Subscribed"},
+		{
+			email{
+				isSubscribed: false,
+				body:         "It is I, Arthur, son of Uther Pendragon, from the castle of Camelot. King of the Britons, defeator of the Saxons, sovereign of all England!",
+				toAddress:    "soldier@monty.com",
+			},
+			"soldier@monty.com",
+			6.95,
+		},
+		{
+			email{
+				isSubscribed: true,
+				body:         "Pull the other one!",
+				toAddress:    "arthur@monty.com",
+			},
+			"arthur@monty.com",
+			0.19,
+		},
+		{
+			sms{
+				isSubscribed:  true,
+				body:          "I am. And this my trusty servant Patsy.",
+				toPhoneNumber: "+155555509832",
+			},
+			"+155555509832",
+			1.17,
+		},
+		{
+			invalid{},
+			"",
+			0.0,
+		},
 	}...)
 
 	testCases := runCases
@@ -29,34 +65,28 @@ func Test(t *testing.T) {
 		testCases = submitCases
 	}
 
-	skipped := len(submitCases) - len(testCases)
-
 	passCount := 0
 	failCount := 0
+	skipped := len(submitCases) - len(testCases)
 
 	for _, test := range testCases {
-		e := email{
-			body:         test.body,
-			isSubscribed: test.isSubscribed,
-		}
-		cost := e.cost()
-		format := e.format()
-		if format != test.expectedFormat || cost != test.expectedCost {
+		to, cost := getExpenseReport(test.expense)
+		if to != test.expectedTo || cost != test.expectedCost {
 			failCount++
 			t.Errorf(`---------------------------------
-Inputs:     (%v, %v)
+Inputs:     %+v
 Expecting:  (%v, %v)
 Actual:     (%v, %v)
 Fail
-`, test.body, test.isSubscribed, test.expectedCost, test.expectedFormat, cost, format)
+`, test.expense, test.expectedTo, test.expectedCost, to, cost)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
-Inputs:     (%v, %v)
+Inputs:     %+v
 Expecting:  (%v, %v)
 Actual:     (%v, %v)
 Pass
-`, test.body, test.isSubscribed, test.expectedCost, test.expectedFormat, cost, format)
+`, test.expense, test.expectedTo, test.expectedCost, to, cost)
 		}
 	}
 
@@ -66,6 +96,7 @@ Pass
 	} else {
 		fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 	}
+
 }
 
 // withSubmit is set at compile time depending
