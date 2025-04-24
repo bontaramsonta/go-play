@@ -1,63 +1,35 @@
 package main
 
-// this switch on type is facinating
-func getExpenseReportSwitch(e expense) (string, float64) {
-	switch obj := e.(type) {
-	case email:
-		return obj.toAddress, obj.cost()
-	case sms:
-		return obj.toPhoneNumber, obj.cost()
-	default:
-		return "", 0.0
-	}
+type Formatter interface {
+	Format() string
 }
 
-func getExpenseReport(e expense) (string, float64) {
-	emailObj, ok := e.(email)
-	if ok {
-		return emailObj.toAddress, emailObj.cost()
-	}
-	smsObj, ok := e.(sms)
-	if ok {
-		return smsObj.toPhoneNumber, smsObj.cost()
-	}
-	return "", 0.0
+type PlainText struct {
+	message string
 }
 
-// don't touch below this line
-
-type expense interface {
-	cost() float64
+func (p PlainText) Format() string {
+	return p.message
 }
 
-type email struct {
-	isSubscribed bool
-	body         string
-	toAddress    string
+type Bold struct {
+	message string
 }
 
-type sms struct {
-	isSubscribed  bool
-	body          string
-	toPhoneNumber string
+func (b Bold) Format() string {
+	return "**" + b.message + "**"
 }
 
-type invalid struct{}
-
-func (e email) cost() float64 {
-	if !e.isSubscribed {
-		return float64(len(e.body)) * .05
-	}
-	return float64(len(e.body)) * .01
+type Code struct {
+	message string
 }
 
-func (s sms) cost() float64 {
-	if !s.isSubscribed {
-		return float64(len(s.body)) * .1
-	}
-	return float64(len(s.body)) * .03
+func (c Code) Format() string {
+	return "`" + c.message + "`"
 }
 
-func (i invalid) cost() float64 {
-	return 0.0
+// Don't Touch below this line
+
+func SendMessage(formatter Formatter) string {
+	return formatter.Format() // Adjusted to call Format without an argument
 }
