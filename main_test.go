@@ -3,36 +3,22 @@ package main
 import (
 	"fmt"
 	"testing"
-	"time"
 )
 
 func Test(t *testing.T) {
 	type testCase struct {
-		msg          message
-		expectedText string
-		expectedCost int
+		emp      employee
+		expected int
 	}
 
 	runCases := []testCase{
-		{birthdayMessage{time.Date(1994, 03, 21, 0, 0, 0, 0, time.UTC), "John Doe"},
-			"Hi John Doe, it is your birthday on 1994-03-21T00:00:00Z",
-			168,
-		},
-		{sendingReport{"First Report", 10},
-			`Your "First Report" report is ready. You've sent 10 messages.`,
-			183,
-		},
+		{fullTime{name: "Bob", salary: 7300}, 7300},
+		{contractor{name: "Jill", hourlyPay: 872, hoursPerYear: 982}, 856304},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{birthdayMessage{time.Date(1934, 05, 01, 0, 0, 0, 0, time.UTC), "Bill Deer"},
-			"Hi Bill Deer, it is your birthday on 1934-05-01T00:00:00Z",
-			171,
-		},
-		{sendingReport{"Second Report", 20},
-			`Your "Second Report" report is ready. You've sent 20 messages.`,
-			186,
-		},
+		{fullTime{name: "Alice", salary: 10000}, 10000},
+		{contractor{name: "John", hourlyPay: 1000, hoursPerYear: 1000}, 1000000},
 	}...)
 
 	testCases := runCases
@@ -46,23 +32,23 @@ func Test(t *testing.T) {
 	failCount := 0
 
 	for _, test := range testCases {
-		text, cost := sendMessage(test.msg)
-		if text != test.expectedText || cost != test.expectedCost {
+		salary := test.emp.getSalary()
+		if salary != test.expected {
 			failCount++
 			t.Errorf(`---------------------------------
 Inputs:     %+v
-Expecting:  (%v, %v)
-Actual:     (%v, %v)
+Expecting:  %v
+Actual:     %v
 Fail
-`, test.msg, test.expectedText, test.expectedCost, text, cost)
+`, test.emp, test.expected, salary)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
 Inputs:     %+v
-Expecting:  (%v, %v)
-Actual:     (%v, %v)
+Expecting:  %v
+Actual:     %v
 Pass
-`, test.msg, test.expectedText, test.expectedCost, text, cost)
+`, test.emp, test.expected, salary)
 		}
 	}
 
