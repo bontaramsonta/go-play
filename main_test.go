@@ -2,76 +2,44 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 )
 
 func Test(t *testing.T) {
 	type testCase struct {
-		notification       notification
-		expectedID         string
-		expectedImportance int
+		msgToCustomer string
+		msgToSpouse   string
+		expectedCost  int
+		expectedErr   error
 	}
 
 	runCases := []testCase{
 		{
-			directMessage{
-				senderUsername: "Kaladin",
-				messageContent: "Life before death",
-				priorityLevel:  10,
-				isUrgent:       true,
-			},
-			"Kaladin",
-			50,
+			"Thanks for coming in to our flower shop today!",
+			"We hope you enjoyed your gift.",
+			0,
+			fmt.Errorf("can't send texts over 25 characters"),
 		},
 		{
-			groupMessage{
-				groupName:      "Bridge 4",
-				messageContent: "Soups ready!",
-				priorityLevel:  2,
-			},
-			"Bridge 4",
-			2,
-		},
-		{
-			systemAlert{
-				alertCode:      "ALERT001",
-				messageContent: "THIS IS NOT A TEST HIGH STORM COMING SOON",
-			},
-			"ALERT001",
-			100,
+			"Thanks for joining us!",
+			"Have a good day.",
+			76,
+			nil,
 		},
 	}
 
 	submitCases := append(runCases, []testCase{
 		{
-			directMessage{
-				senderUsername: "Shallan",
-				messageContent: "I am that I am.",
-				priorityLevel:  5,
-				isUrgent:       false,
-			},
-			"Shallan",
-			5,
+			"Thank you.",
+			"Enjoy!",
+			32,
+			nil,
 		},
 		{
-			groupMessage{
-				groupName:      "Knights Radiant",
-				messageContent: "For the greater good.",
-				priorityLevel:  10,
-			},
-			"Knights Radiant",
-			10,
-		},
-		{
-			directMessage{
-				senderUsername: "Adolin",
-				messageContent: "Duels are my favorite.",
-				priorityLevel:  3,
-				isUrgent:       true,
-			},
-			"Adolin",
-			50,
+			"We loved having you in!",
+			"We hope the rest of your evening is fantastic.",
+			0,
+			fmt.Errorf("can't send texts over 25 characters"),
 		},
 	}...)
 
@@ -84,29 +52,33 @@ func Test(t *testing.T) {
 	passCount := 0
 	failCount := 0
 
-	for i, test := range testCases {
-		t.Run("TestProcessNotification_"+strconv.Itoa(i+1), func(t *testing.T) {
-			id, importance := processNotification(test.notification)
-			if id != test.expectedID || importance != test.expectedImportance {
-				failCount++
-				t.Errorf(`---------------------------------
-Test Failed: TestProcessNotification_%d
-Notification: %+v
-Expecting:    %v/%d
-Actual:       %v/%d
+	for _, test := range testCases {
+		cost, err := sendSMSToCouple(test.msgToCustomer, test.msgToSpouse)
+		errString := ""
+		if err != nil {
+			errString = err.Error()
+		}
+		expectedErrString := ""
+		if test.expectedErr != nil {
+			expectedErrString = test.expectedErr.Error()
+		}
+		if cost != test.expectedCost || errString != expectedErrString {
+			failCount++
+			t.Errorf(`---------------------------------
+Inputs:     (%v, %v)
+Expecting:  (%v, %v)
+Actual:     (%v, %v)
 Fail
-`, i+1, test.notification, test.expectedID, test.expectedImportance, id, importance)
-			} else {
-				passCount++
-				fmt.Printf(`---------------------------------
-Test Passed: TestProcessNotification_%d
-Notification: %+v
-Expecting:    %v/%d
-Actual:       %v/%d
+`, test.msgToCustomer, test.msgToSpouse, test.expectedCost, test.expectedErr, cost, err)
+		} else {
+			passCount++
+			fmt.Printf(`---------------------------------
+Inputs:     (%v, %v)
+Expecting:  (%v, %v)
+Actual:     (%v, %v)
 Pass
-`, i+1, test.notification, test.expectedID, test.expectedImportance, id, importance)
-			}
-		})
+`, test.msgToCustomer, test.msgToSpouse, test.expectedCost, test.expectedErr, cost, err)
+		}
 	}
 
 	fmt.Println("---------------------------------")
@@ -115,7 +87,6 @@ Pass
 	} else {
 		fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 	}
-
 }
 
 // withSubmit is set at compile time depending
