@@ -7,18 +7,21 @@ import (
 
 func Test(t *testing.T) {
 	type testCase struct {
-		emp      employee
-		expected int
+		body           string
+		isSubscribed   bool
+		expectedCost   int
+		expectedFormat string
 	}
 
 	runCases := []testCase{
-		{fullTime{name: "Bob", salary: 7300}, 7300},
-		{contractor{name: "Jill", hourlyPay: 872, hoursPerYear: 982}, 856304},
+		{"hello there", true, 22, "'hello there' | Subscribed"},
+		{"general kenobi", false, 70, "'general kenobi' | Not Subscribed"},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{fullTime{name: "Alice", salary: 10000}, 10000},
-		{contractor{name: "John", hourlyPay: 1000, hoursPerYear: 1000}, 1000000},
+		{"i hate sand", true, 22, "'i hate sand' | Subscribed"},
+		{"it's coarse and rough and irritating", false, 180, "'it's coarse and rough and irritating' | Not Subscribed"},
+		{"and it gets everywhere", true, 44, "'and it gets everywhere' | Subscribed"},
 	}...)
 
 	testCases := runCases
@@ -32,23 +35,28 @@ func Test(t *testing.T) {
 	failCount := 0
 
 	for _, test := range testCases {
-		salary := test.emp.getSalary()
-		if salary != test.expected {
+		e := email{
+			body:         test.body,
+			isSubscribed: test.isSubscribed,
+		}
+		cost := e.cost()
+		format := e.format()
+		if format != test.expectedFormat || cost != test.expectedCost {
 			failCount++
 			t.Errorf(`---------------------------------
-Inputs:     %+v
-Expecting:  %v
-Actual:     %v
+Inputs:     (%v, %v)
+Expecting:  (%v, %v)
+Actual:     (%v, %v)
 Fail
-`, test.emp, test.expected, salary)
+`, test.body, test.isSubscribed, test.expectedCost, test.expectedFormat, cost, format)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
-Inputs:     %+v
-Expecting:  %v
-Actual:     %v
+Inputs:     (%v, %v)
+Expecting:  (%v, %v)
+Actual:     (%v, %v)
 Pass
-`, test.emp, test.expected, salary)
+`, test.body, test.isSubscribed, test.expectedCost, test.expectedFormat, cost, format)
 		}
 	}
 
@@ -58,7 +66,6 @@ Pass
 	} else {
 		fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 	}
-
 }
 
 // withSubmit is set at compile time depending
