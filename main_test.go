@@ -5,42 +5,23 @@ import (
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestDivide(t *testing.T) {
 	type testCase struct {
-		msgToCustomer string
-		msgToSpouse   string
-		expectedCost  int
-		expectedErr   error
+		dividend, divisor, expected float64
+		expectedError               string
 	}
 
 	runCases := []testCase{
-		{
-			"Thanks for coming in to our flower shop today!",
-			"We hope you enjoyed your gift.",
-			0,
-			fmt.Errorf("can't send texts over 25 characters"),
-		},
-		{
-			"Thanks for joining us!",
-			"Have a good day.",
-			76,
-			nil,
-		},
+		{10, 2, 5, ""},
+		{15, 3, 5, ""},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{
-			"Thank you.",
-			"Enjoy!",
-			32,
-			nil,
-		},
-		{
-			"We loved having you in!",
-			"We hope the rest of your evening is fantastic.",
-			0,
-			fmt.Errorf("can't send texts over 25 characters"),
-		},
+		{10, 0, 0, "can not divide 10 by zero"},
+		{15, 0, 0, "can not divide 15 by zero"},
+		{100, 10, 10, ""},
+		{16, 4, 4, ""},
+		{30, 6, 5, ""},
 	}...)
 
 	testCases := runCases
@@ -49,27 +30,24 @@ func Test(t *testing.T) {
 	}
 
 	skipped := len(submitCases) - len(testCases)
+
 	passCount := 0
 	failCount := 0
 
 	for _, test := range testCases {
-		cost, err := sendSMSToCouple(test.msgToCustomer, test.msgToSpouse)
-		errString := ""
+		output, err := divide(test.dividend, test.divisor)
+		var errString string
 		if err != nil {
 			errString = err.Error()
 		}
-		expectedErrString := ""
-		if test.expectedErr != nil {
-			expectedErrString = test.expectedErr.Error()
-		}
-		if cost != test.expectedCost || errString != expectedErrString {
+		if output != test.expected || errString != test.expectedError {
 			failCount++
 			t.Errorf(`---------------------------------
 Inputs:     (%v, %v)
 Expecting:  (%v, %v)
 Actual:     (%v, %v)
 Fail
-`, test.msgToCustomer, test.msgToSpouse, test.expectedCost, test.expectedErr, cost, err)
+`, test.dividend, test.divisor, test.expected, test.expectedError, output, errString)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
@@ -77,7 +55,7 @@ Inputs:     (%v, %v)
 Expecting:  (%v, %v)
 Actual:     (%v, %v)
 Pass
-`, test.msgToCustomer, test.msgToSpouse, test.expectedCost, test.expectedErr, cost, err)
+`, test.dividend, test.divisor, test.expected, test.expectedError, output, errString)
 		}
 	}
 
