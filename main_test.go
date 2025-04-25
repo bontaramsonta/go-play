@@ -2,53 +2,79 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestTagMessages(t *testing.T) {
 	type testCase struct {
-		numMessages int
-		expected    float64
+		messages []sms
+		expected [][]string
 	}
+
 	runCases := []testCase{
-		{10, 10.45},
-		{20, 21.9},
+		{
+			messages: []sms{{id: "001", content: "Urgent, please respond!"}, {id: "002", content: "Big sale on all items!"}},
+			expected: [][]string{{"Urgent"}, {"Promo"}},
+		},
+		{
+			messages: []sms{{id: "003", content: "Enjoy your day"}},
+			expected: [][]string{{}},
+		},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{0, 0.0},
-		{1, 1.0},
-		{5, 5.10},
-		{30, 34.35},
+		{
+			messages: []sms{{id: "004", content: "Sale! Don't miss out on these urgent promotions!"}},
+			expected: [][]string{{"Urgent", "Promo"}},
+		},
+		{
+			messages: []sms{{id: "005", content: "i nEEd URgEnt help, my FROZEN FLAME was used"}, {id: "006", content: "wAnt to saLE 200x heavy leather"}},
+			expected: [][]string{{"Urgent"}, {"Promo"}},
+		},
 	}...)
 
 	testCases := runCases
 	if withSubmit {
 		testCases = submitCases
 	}
+
 	skipped := len(submitCases) - len(testCases)
 
 	passCount := 0
 	failCount := 0
 
 	for _, test := range testCases {
-		output := bulkSend(test.numMessages)
-		if fmt.Sprintf("%.2f", output) != fmt.Sprintf("%.2f", test.expected) {
+		actual := tagMessages(test.messages, tagger)
+		if len(actual) != len(test.expected) {
 			failCount++
 			t.Errorf(`---------------------------------
-Inputs:     (%v)
-Expecting:  %.2f
-Actual:     %.2f
+Test Failed for length of returned sms slice
+Expecting: %v
+Actual:    %v
 Fail
-`, test.numMessages, test.expected, output)
-		} else {
-			passCount++
-			fmt.Printf(`---------------------------------
-Inputs:     (%v)
-Expecting:  %.2f
-Actual:     %.2f
+`, len(test.expected), len(actual))
+			continue
+		}
+
+		for i, msg := range actual {
+			if !reflect.DeepEqual(msg.tags, test.expected[i]) {
+				failCount++
+				t.Errorf(`---------------------------------
+Test Failed for message ID %s
+Expecting: %v
+Actual:    %v
+Fail
+`, msg.id, test.expected[i], msg.tags)
+			} else {
+				passCount++
+				fmt.Printf(`---------------------------------
+Test Passed for message ID %s
+Expecting: %v
+Actual:    %v
 Pass
-`, test.numMessages, test.expected, output)
+`, msg.id, test.expected[i], msg.tags)
+			}
 		}
 	}
 
@@ -58,6 +84,7 @@ Pass
 	} else {
 		fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 	}
+
 }
 
 // withSubmit is set at compile time depending
