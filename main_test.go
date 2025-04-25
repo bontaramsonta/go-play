@@ -5,54 +5,50 @@ import (
 	"testing"
 )
 
-func TestValidateStatus(t *testing.T) {
+func Test(t *testing.T) {
 	type testCase struct {
-		status      string
-		expectedErr string
+		numMessages int
+		expected    float64
 	}
-
 	runCases := []testCase{
-		{"", "status cannot be empty"},
-		{"This is a valid status update that is well within the character limit.", ""},
-		{"This status update is way too long. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.", "status exceeds 140 characters"},
+		{10, 10.45},
+		{20, 21.9},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{"Another valid status.", ""},
-		{"This status update, while derivative, contains exactly one hundred and forty-one characters, which is over the status update character limit.", "status exceeds 140 characters"},
+		{0, 0.0},
+		{1, 1.0},
+		{5, 5.10},
+		{30, 34.35},
 	}...)
 
 	testCases := runCases
 	if withSubmit {
 		testCases = submitCases
 	}
-
 	skipped := len(submitCases) - len(testCases)
+
 	passCount := 0
 	failCount := 0
 
 	for _, test := range testCases {
-		err := validateStatus(test.status)
-		errString := ""
-		if err != nil {
-			errString = err.Error()
-		}
-		if errString != test.expectedErr {
+		output := bulkSend(test.numMessages)
+		if fmt.Sprintf("%.2f", output) != fmt.Sprintf("%.2f", test.expected) {
 			failCount++
 			t.Errorf(`---------------------------------
-Inputs:     "%v"
-Expecting:  "%v"
-Actual:     "%v"
+Inputs:     (%v)
+Expecting:  %.2f
+Actual:     %.2f
 Fail
-`, test.status, test.expectedErr, errString)
+`, test.numMessages, test.expected, output)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
-Inputs:     "%v"
-Expecting:  "%v"
-Actual:     "%v"
+Inputs:     (%v)
+Expecting:  %.2f
+Actual:     %.2f
 Pass
-`, test.status, test.expectedErr, errString)
+`, test.numMessages, test.expected, output)
 		}
 	}
 
