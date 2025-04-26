@@ -1,27 +1,28 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
-type sms struct {
-	id      string
-	content string
-	tags    []string
-}
+const nihongo = "日本語"
 
-func tagMessages(messages []sms, tagger func(sms) []string) []sms {
-	for i := 0; i < len(messages); i++ {
-		messages[i].tags = tagger(messages[i])
+func main() {
+	// decode first rune
+	first, _ := utf8.DecodeRuneInString(nihongo)
+	s := string(first)
+	println(s)
+	// decode controlled
+	for i, w := 0, 0; i < len(nihongo); i += w {
+		// max length of utf8 rune is 4 bytes
+		runeValue, width := utf8.DecodeRuneInString(nihongo[i:min(i+4, len(nihongo))])
+		fmt.Printf("%#U starts at byte position %d\n", runeValue, i)
+		w = width
 	}
-	return messages
-}
-
-func tagger(msg sms) []string {
-	tags := []string{}
-	if strings.Contains(strings.ToLower(msg.content), "urgent") {
-		tags = append(tags, "Urgent")
+	// standard way to decode runes
+	runes := []rune(nihongo)
+	println("Better loop")
+	for _, r := range runes {
+		fmt.Printf("%#U\n", r)
 	}
-	if strings.Contains(strings.ToLower(msg.content), "sale") {
-		tags = append(tags, "Promo")
-	}
-	return tags
 }
