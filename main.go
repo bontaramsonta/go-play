@@ -1,28 +1,22 @@
 package main
 
-import (
-	"fmt"
-	"unicode/utf8"
-)
+import "slices"
 
-const nihongo = "日本語"
-
-func main() {
-	// decode first rune
-	first, _ := utf8.DecodeRuneInString(nihongo)
-	s := string(first)
-	println(s)
-	// decode controlled
-	for i, w := 0, 0; i < len(nihongo); i += w {
-		// max length of utf8 rune is 4 bytes
-		runeValue, width := utf8.DecodeRuneInString(nihongo[i:min(i+4, len(nihongo))])
-		fmt.Printf("%#U starts at byte position %d\n", runeValue, i)
-		w = width
+func findSuggestedFriends(username string, friendships map[string][]string) []string {
+	directFriends := friendships[username]
+	ignoreList := append([]string{username}, directFriends...)
+	fm := make(map[string]bool)
+	for _, df := range directFriends {
+		fodf := friendships[df]
+		for _, sf := range fodf {
+			if !slices.Contains(ignoreList, sf) {
+				fm[sf] = true
+			}
+		}
 	}
-	// standard way to decode runes
-	runes := []rune(nihongo)
-	println("Better loop")
-	for _, r := range runes {
-		fmt.Printf("%#U\n", r)
+	var sflist []string
+	for k := range fm {
+		sflist = append(sflist, k)
 	}
+	return sflist
 }
