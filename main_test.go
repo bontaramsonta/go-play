@@ -2,76 +2,56 @@ package main
 
 import (
 	"fmt"
-	"reflect"
-	"sort"
 	"testing"
 )
 
 func Test(t *testing.T) {
-	friendships := map[string][]string{
-		"Dalinar": {"Kaladin", "Pattern", "Shallan"},
-		"Kaladin": {"Dalinar", "Syl", "Teft", "Shallan"},
-		"Pattern": {"Dalinar", "Teft", "Shallan"},
-		"Syl":     {"Kaladin"},
-		"Teft":    {"Kaladin", "Pattern"},
-		"Moash":   {},
-		"Shallan": {"Pattern", "Kaladin", "Dalinar"},
-	}
-
 	type testCase struct {
-		username string
-		expected []string
+		costMultiplier   float64
+		maxCostInPennies int
+		expected         int
 	}
 
 	runCases := []testCase{
-		{"Dalinar", []string{"Syl", "Teft"}},
-		{"Kaladin", []string{"Pattern"}},
-		{"Pattern", []string{"Kaladin"}},
-		{"Syl", []string{"Dalinar", "Shallan", "Teft"}},
-		{"Teft", []string{"Dalinar", "Shallan", "Syl"}},
-		{"Moash", nil},
+		{1.1, 5, 4},
+		{1.3, 10, 5},
+		{1.35, 25, 7},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{
-			"Odium", nil,
-		},
-		{
-			"Shallan", []string{"Syl", "Teft"},
-		},
+		{1.2, 1, 1},
+		{1.2, 15, 7},
+		{1.3, 20, 7},
 	}...)
 
 	testCases := runCases
 	if withSubmit {
 		testCases = submitCases
 	}
-
 	skipped := len(submitCases) - len(testCases)
+
 	passCount := 0
 	failCount := 0
 
 	for _, test := range testCases {
-		t.Run(test.username, func(t *testing.T) {
-			result := findSuggestedFriends(test.username, friendships)
-			sort.Strings(result)
-			if !reflect.DeepEqual(result, test.expected) {
-				failCount++
-				t.Errorf(`---------------------------------
-Test Failed for username %s:
+		output := getMaxMessagesToSend(test.costMultiplier, test.maxCostInPennies)
+		if output != test.expected {
+			failCount++
+			t.Errorf(`---------------------------------
+Inputs:     (%v, %v)
 Expecting:  %v
 Actual:     %v
 Fail
-`, test.username, formatSlice(test.expected), formatSlice(result))
-			} else {
-				passCount++
-				fmt.Printf(`---------------------------------
-Test Passed for username %s:
+`, test.costMultiplier, test.maxCostInPennies, test.expected, output)
+		} else {
+			passCount++
+			fmt.Printf(`---------------------------------
+Inputs:     (%v, %v)
 Expecting:  %v
 Actual:     %v
 Pass
-`, test.username, formatSlice(test.expected), formatSlice(result))
-			}
-		})
+`, test.costMultiplier, test.maxCostInPennies, test.expected, output)
+		}
 	}
 
 	fmt.Println("---------------------------------")
@@ -80,13 +60,6 @@ Pass
 	} else {
 		fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 	}
-}
-
-func formatSlice(slice []string) string {
-	if slice == nil {
-		return "nil"
-	}
-	return fmt.Sprintf("%+v", slice)
 }
 
 // withSubmit is set at compile time depending

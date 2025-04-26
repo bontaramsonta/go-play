@@ -1,3 +1,3 @@
-module github.com/bontaramsonta/go-play
+module github.com/bontaramsonta/hellogo
 
 go 1.23.2
