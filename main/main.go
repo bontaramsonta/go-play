@@ -1,35 +1,27 @@
 package main
 
 import (
+	"sync"
 	"time"
 )
 
-func saveBackups(snapshotTicker, saveAfter <-chan time.Time, logChan chan string) {
-	for {
-		select {
-		case <-snapshotTicker:
-			takeSnapshot(logChan)
-		case <-saveAfter:
-			saveSnapshot(logChan)
-			return
-		default:
-			waitForData(logChan)
-			time.Sleep(500 * time.Millisecond)
-		}
+func processMessages(messages []string) []string {
+	var pm []string
+	var wg sync.WaitGroup
+	for _, m := range messages {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			pm = append(pm, process(m))
+		}()
 	}
+	wg.Wait()
+	return pm
 }
 
 // don't touch below this line
 
-func takeSnapshot(logChan chan string) {
-	logChan <- "Taking a backup snapshot..."
-}
-
-func saveSnapshot(logChan chan string) {
-	logChan <- "All backups saved!"
-	close(logChan)
-}
-
-func waitForData(logChan chan string) {
-	logChan <- "Nothing to do, waiting..."
+func process(message string) string {
+	time.Sleep(1 * time.Second)
+	return message + "-processed"
 }
