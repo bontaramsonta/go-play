@@ -1,29 +1,49 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
 )
 
-func isValidJSON(input string) bool {
-	var out bytes.Buffer
-	err := json.Indent(&out, []byte(input), "", "  ")
-	return err == nil
-}
-
-func TestIsValidJSON(t *testing.T) {
+func Test(t *testing.T) {
 	type testCase struct {
-		input string
+		inputUrl string
+		expected ParsedURL
 	}
 
 	runCases := []testCase{
-		{issueList},
+		{
+			"http://waynelagner:pwn3d@jello.app:8080/boards?sort=createdAt#id",
+			ParsedURL{
+				protocol: "http",
+				username: "waynelagner",
+				password: "pwn3d",
+				hostname: "jello.app",
+				port:     "8080",
+				pathname: "/boards",
+				search:   "sort=createdAt",
+				hash:     "id",
+			},
+		},
+		{
+			"https://jello.app/issues?sort=priority",
+			ParsedURL{
+				protocol: "https",
+				username: "",
+				password: "",
+				hostname: "jello.app",
+				port:     "",
+				pathname: "/issues",
+				search:   "sort=priority",
+				hash:     "",
+			},
+		},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{userObject},
+		{"", ParsedURL{}},
+		{"://example.com", ParsedURL{}},
 	}...)
 
 	testCases := runCases
@@ -33,37 +53,36 @@ func TestIsValidJSON(t *testing.T) {
 
 	skipped := len(submitCases) - len(testCases)
 
-	passed := 0
-	failed := 0
+	passCount := 0
+	failCount := 0
 
 	for _, test := range testCases {
-		if output := isValidJSON(test.input); !output {
-			failed++
+		parsedUrl := newParsedURL(test.inputUrl)
+		if !reflect.DeepEqual(parsedUrl, test.expected) {
+			failCount++
 			t.Errorf(`---------------------------------
-Test Failed. Input:
-%v
-  =>
-expected isValidJSON: %v
-actual isValidJSON: %v
-`,
-				test.input, true, output)
+URL:		%v
+Expecting:  %+v
+Actual:     %+v
+Fail
+`, test.inputUrl, test.expected, parsedUrl)
+
 		} else {
-			passed++
+			passCount++
 			fmt.Printf(`---------------------------------
-Test Passed. Input:
-%v
-  =>
-expected isValidJSON: %v
-actual isValidJSON: %v
-`,
-				test.input, true, output)
+URL:		%v
+Expecting:  %+v
+Actual:     %+v
+Pass
+`, test.inputUrl, test.expected, parsedUrl)
 		}
 	}
+
 	fmt.Println("---------------------------------")
 	if skipped > 0 {
-		fmt.Printf("%d passed, %d failed, %d skipped\n", passed, failed, skipped)
+		fmt.Printf("%d passed, %d failed, %d skipped\n", passCount, failCount, skipped)
 	} else {
-		fmt.Printf("%d passed, %d failed\n", passed, failed)
+		fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 	}
 
 }

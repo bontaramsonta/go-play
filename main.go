@@ -1,22 +1,35 @@
 package main
 
-const issueList = `[
-	{
-		"id": 0,
-		"name": "Fix the thing",
-		"estimate": 0.5,
-		"completed": false
-	},
-	{
-		"id": 1,
-		"name": "Unstick the widget",
-		"estimate": 30,
-		"completed": false
-	}
-]`
+import (
+	"net/url"
+)
 
-const userObject = `{
-	"name": "Wayne Lagner",
-	"role": "Developer",
-	"remote": true
-}`
+type ParsedURL struct {
+	protocol string
+	username string
+	password string
+	hostname string
+	port     string
+	pathname string
+	search   string
+	hash     string
+}
+
+func newParsedURL(urlString string) ParsedURL {
+	parsedUrl, err := url.Parse(urlString)
+	if err != nil {
+		return ParsedURL{}
+	}
+
+	password, _ := parsedUrl.User.Password()
+	return ParsedURL{
+		protocol: parsedUrl.Scheme,
+		username: parsedUrl.User.Username(),
+		password: password,
+		hostname: parsedUrl.Hostname(),
+		port:     parsedUrl.Port(),
+		pathname: parsedUrl.Path,
+		search:   parsedUrl.RawQuery,
+		hash:     parsedUrl.Fragment,
+	}
+}
