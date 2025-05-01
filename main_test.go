@@ -2,48 +2,24 @@ package main
 
 import (
 	"fmt"
-	"reflect"
+	"net/http"
 	"testing"
 )
 
 func Test(t *testing.T) {
 	type testCase struct {
-		inputUrl string
-		expected ParsedURL
+		headers  map[string]string
+		expected string
 	}
 
 	runCases := []testCase{
-		{
-			"http://waynelagner:pwn3d@jello.app:8080/boards?sort=createdAt#id",
-			ParsedURL{
-				protocol: "http",
-				username: "waynelagner",
-				password: "pwn3d",
-				hostname: "jello.app",
-				port:     "8080",
-				pathname: "/boards",
-				search:   "sort=createdAt",
-				hash:     "id",
-			},
-		},
-		{
-			"https://jello.app/issues?sort=priority",
-			ParsedURL{
-				protocol: "https",
-				username: "",
-				password: "",
-				hostname: "jello.app",
-				port:     "",
-				pathname: "/issues",
-				search:   "sort=priority",
-				hash:     "",
-			},
-		},
+		{map[string]string{"Content-Type": "application/json", "Authorization": "Bearer token123"}, "application/json"},
+		{map[string]string{"Content-Type": "text/html", "Accept-Language": "en-US"}, "text/html"},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{"", ParsedURL{}},
-		{"://example.com", ParsedURL{}},
+		{map[string]string{"Authorization": "Bearer token123"}, ""},
+		{map[string]string{"Content-Type": "application/xml", "Cache-Control": "no-cache"}, "application/xml"},
 	}...)
 
 	testCases := runCases
@@ -57,24 +33,31 @@ func Test(t *testing.T) {
 	failCount := 0
 
 	for _, test := range testCases {
-		parsedUrl := newParsedURL(test.inputUrl)
-		if !reflect.DeepEqual(parsedUrl, test.expected) {
+		res := &http.Response{
+			Header: http.Header{},
+		}
+		for key, value := range test.headers {
+			res.Header.Set(key, value)
+		}
+
+		output := getContentType(res)
+
+		if output != test.expected {
 			failCount++
 			t.Errorf(`---------------------------------
-URL:		%v
-Expecting:  %+v
-Actual:     %+v
+Headers:    %v
+Expecting:  %v
+Actual:     %v
 Fail
-`, test.inputUrl, test.expected, parsedUrl)
-
+`, test.headers, test.expected, output)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
-URL:		%v
-Expecting:  %+v
-Actual:     %+v
+Headers:    %v
+Expecting:  %v
+Actual:     %v
 Pass
-`, test.inputUrl, test.expected, parsedUrl)
+`, test.headers, test.expected, output)
 		}
 	}
 
