@@ -2,24 +2,31 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestDebugEncryptDecrypt(t *testing.T) {
 	type testCase struct {
-		headers  map[string]string
-		expected string
+		masterKey string
+		iv        string
+		password  string
+		expectedE string
+		expectedD string
 	}
 
+	const masterKey = "kjhgfdsaqwertyuioplkjhgfdsaqwert"
+	const iv = "1234567812345678"
+
 	runCases := []testCase{
-		{map[string]string{"Content-Type": "application/json", "Authorization": "Bearer token123"}, "application/json"},
-		{map[string]string{"Content-Type": "text/html", "Accept-Language": "en-US"}, "text/html"},
+		{masterKey, iv, "k33pThisPasswordSafe", encrypt("k33pThisPasswordSafe", masterKey, iv), "k33pThisPasswordSafe"},
+		{masterKey, iv, "12345", encrypt("12345", masterKey, iv), "12345"},
+		{masterKey, iv, "thePasswordOnMyLuggage", encrypt("thePasswordOnMyLuggage", masterKey, iv), "thePasswordOnMyLuggage"},
+		{masterKey, iv, "pizza_the_HUt", encrypt("pizza_the_HUt", masterKey, iv), "pizza_the_HUt"},
 	}
 
 	submitCases := append(runCases, []testCase{
-		{map[string]string{"Authorization": "Bearer token123"}, ""},
-		{map[string]string{"Content-Type": "application/xml", "Cache-Control": "no-cache"}, "application/xml"},
+		{masterKey, iv, "another_password", encrypt("another_password", masterKey, iv), "another_password"},
+		{masterKey, iv, "1234567890", encrypt("1234567890", masterKey, iv), "1234567890"},
 	}...)
 
 	testCases := runCases
@@ -28,36 +35,27 @@ func Test(t *testing.T) {
 	}
 
 	skipped := len(submitCases) - len(testCases)
-
 	passCount := 0
 	failCount := 0
 
 	for _, test := range testCases {
-		res := &http.Response{
-			Header: http.Header{},
-		}
-		for key, value := range test.headers {
-			res.Header.Set(key, value)
-		}
-
-		output := getContentType(res)
-
-		if output != test.expected {
+		encrypted, decrypted := debugEncryptDecrypt(test.masterKey, test.iv, test.password)
+		if encrypted != test.expectedE || decrypted != test.expectedD {
 			failCount++
 			t.Errorf(`---------------------------------
-Headers:    %v
-Expecting:  %v
-Actual:     %v
+Inputs:      masterKey: %v, iv: %v, password: %v
+Expecting:   Encrypted: %v, Decrypted: %v
+Actual:      Encrypted: %v, Decrypted: %v
 Fail
-`, test.headers, test.expected, output)
+`, test.masterKey, test.iv, test.password, test.expectedE, test.expectedD, encrypted, decrypted)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
-Headers:    %v
-Expecting:  %v
-Actual:     %v
+Inputs:      masterKey: %v, iv: %v, password: %v
+Expecting:   Encrypted: %v, Decrypted: %v
+Actual:      Encrypted: %v, Decrypted: %v
 Pass
-`, test.headers, test.expected, output)
+`, test.masterKey, test.iv, test.password, test.expectedE, test.expectedD, encrypted, decrypted)
 		}
 	}
 
