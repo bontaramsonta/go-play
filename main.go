@@ -8,6 +8,10 @@ import (
 	"log"
 )
 
+func keyToCipher(key string) (cipher.Block, error) {
+	return aes.NewCipher([]byte(key))
+}
+
 func debugEncryptDecrypt(masterKey, iv, password string) (string, string) {
 	encryptedPassword := encrypt(password, masterKey, iv)
 	decryptedPassword := decrypt(encryptedPassword, masterKey, iv)
@@ -18,7 +22,7 @@ func debugEncryptDecrypt(masterKey, iv, password string) (string, string) {
 
 func encrypt(plainText, key, iv string) string {
 	bytes := []byte(plainText)
-	blockCipher, err := aes.NewCipher([]byte(key))
+	blockCipher, err := keyToCipher(key)
 	if err != nil {
 		log.Println(err)
 		return ""
@@ -29,7 +33,7 @@ func encrypt(plainText, key, iv string) string {
 }
 
 func decrypt(cipherText, key, iv string) string {
-	blockCipher, err := aes.NewCipher([]byte(key))
+	blockCipher, err := keyToCipher(key)
 	if err != nil {
 		log.Println(err)
 		return ""
