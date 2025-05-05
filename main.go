@@ -6,7 +6,16 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"math/rand"
 )
+
+func generateRandomKey(length int) (string, error) {
+	key := make([]byte, length)
+	if _, err := rand.Read(key); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", key), nil
+}
 
 func keyToCipher(key string) (cipher.Block, error) {
 	return aes.NewCipher([]byte(key))
