@@ -8,24 +8,18 @@ import (
 
 func getHexString(b []byte) string {
 	hex := []string{}
-	for i, v := range b {
+	for _, v := range b {
 		hex = append(hex, fmt.Sprintf("%02x", v))
-		if i != len(b)-1 {
-			hex = append(hex, ":")
-		}
 	}
-	return strings.Join(hex, "")
+	return strings.Join(hex, ":")
 }
 
 func getBinaryString(b []byte) string {
 	binary := []string{}
-	for i, v := range b {
+	for _, v := range b {
 		binary = append(binary, fmt.Sprintf("%08b", v))
-		if i != len(b)-1 {
-			binary = append(binary, ":")
-		}
 	}
-	return strings.Join(binary, "")
+	return strings.Join(binary, ":")
 }
 
 func TestGetHexString(t *testing.T) {
