@@ -7,25 +7,25 @@ import (
 )
 
 func getHexString(b []byte) string {
-	var builder strings.Builder
+	hex := []string{}
 	for i, v := range b {
-		builder.WriteString(fmt.Sprintf("%02x", v))
+		hex = append(hex, fmt.Sprintf("%02x", v))
 		if i != len(b)-1 {
-			builder.WriteString(":")
+			hex = append(hex, ":")
 		}
 	}
-	return builder.String()
+	return strings.Join(hex, "")
 }
 
 func getBinaryString(b []byte) string {
-	var builder strings.Builder
+	binary := []string{}
 	for i, v := range b {
-		builder.WriteString(fmt.Sprintf("%08b", v))
+		binary = append(binary, fmt.Sprintf("%08b", v))
 		if i != len(b)-1 {
-			builder.WriteString(":")
+			binary = append(binary, ":")
 		}
 	}
-	return builder.String()
+	return strings.Join(binary, "")
 }
 
 func TestGetHexString(t *testing.T) {
