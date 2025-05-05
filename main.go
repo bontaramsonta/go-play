@@ -9,6 +9,15 @@ import (
 	"math/rand"
 )
 
+func base8Char(bits byte) string {
+	const base8Alphabet = "ABCDEFGH"
+	n := int(bits)
+	if n > 7 {
+		return ""
+	}
+	return string(base8Alphabet[n])
+}
+
 func generateRandomKey(length int) (string, error) {
 	key := make([]byte, length)
 	if _, err := rand.Read(key); err != nil {
