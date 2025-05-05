@@ -2,6 +2,15 @@ package encodings
 
 import "testing"
 
+func Base8Char(bits byte) string {
+	const base8Alphabet = "ABCDEFGH"
+	n := int(bits)
+	if n > 7 {
+		return ""
+	}
+	return string(base8Alphabet[n])
+}
+
 func TestBase8Char(t *testing.T) {
 	type testCase struct {
 		bits       byte
