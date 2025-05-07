@@ -12,6 +12,17 @@ func keyToCipher(key string) (cipher.Block, error) {
 	return aes.NewCipher([]byte(key))
 }
 
+func deriveRoundKey(masterKey [4]byte, roundNumber int) [4]byte {
+	var roundKey [4]byte
+
+	// XOR each byte of the master key with the round number
+	for i := range 4 {
+		roundKey[i] = masterKey[i] ^ byte(roundNumber)
+	}
+
+	return roundKey
+}
+
 func DebugEncryptDecrypt(masterKey, iv, password string) (string, string) {
 	encryptedPassword := encrypt(password, masterKey, iv)
 	decryptedPassword := decrypt(encryptedPassword, masterKey, iv)
