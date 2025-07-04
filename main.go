@@ -1,114 +1,114 @@
 package main
 
-func maxProfit(prices []int) int {
-	mp := 0
-	for i := range len(prices) - 1 {
-		if prices[i+1] > prices[i] {
-			mp += prices[i+1] - prices[i]
+import (
+	"math/rand"
+	"sort"
+)
+
+func hIndex(citations []int) int {
+	sort.Sort(sort.Reverse(sort.IntSlice(citations)))
+	for i, citation := range citations {
+		if citation < i+1 {
+			return i
 		}
 	}
-	return mp
+	return len(citations)
 }
 
-func canJump(nums []int) bool {
-	if len(nums) <= 1 {
+type RandomizedSet struct {
+	set map[int]int8
+}
+
+func Constructor() RandomizedSet {
+	return RandomizedSet{
+		set: make(map[int]int8),
+	}
+}
+
+func (this *RandomizedSet) Insert(val int) bool {
+	if _, ok := this.set[val]; ok {
+		return false
+	} else {
+		this.set[val] = 1
 		return true
 	}
-	mjp := 0
-	for i := range len(nums) - 1 {
-		mjp = max(mjp-1, nums[i])
-		if mjp <= 0 {
-			return false
-		}
-	}
-	return true
 }
 
-func minJump(nums []int) int {
-	fartest := 0
-	jumps := 0
-	current_end := 0
+func (this *RandomizedSet) Remove(val int) bool {
+	if _, ok := this.set[val]; ok {
+		delete(this.set, val)
+		return true
+	} else {
+		return false
+	}
+}
 
-	for i := range len(nums) - 1 {
-		fartest = max(fartest, nums[i]+i)
+func (this *RandomizedSet) GetRandom() int {
+	if len(this.set) == 0 {
+		return 0
+	}
+	keys := make([]int, 0, len(this.set))
+	for k := range this.set {
+		keys = append(keys, k)
+	}
+	return keys[rand.Intn(len(keys))]
+}
 
-		if i == current_end {
-			jumps++
-			current_end = fartest
+func productExceptSelf(nums []int) []int {
+	product := 1
+	countZero := 0
+	for _, num := range nums {
+		if num != 0 {
+			product = product * num
+		} else {
+			countZero++
 		}
 	}
-	return jumps
+	answers := make([]int, len(nums))
+	if countZero > 1 {
+		return answers
+	}
+	for i, num := range nums {
+		if num == 0 {
+			answers[i] = product
+			return append(make([]int, i+1), answers[i:]...)
+		}
+		answers[i] = product / num
+	}
+	return answers
 }
 
 func main() {
-	// Test maxProfit function
-	println("=== Testing maxProfit function ===")
-	maxProfitTests := []struct {
-		name     string
-		prices   []int
-		expected int
-	}{
-		{"Mixed prices", []int{7, 1, 5, 3, 6, 4}, 7},
-		{"All increasing", []int{1, 2, 3, 4, 5}, 4},
-		{"All decreasing", []int{5, 4, 3, 2, 1}, 0},
-		{"Single price", []int{5}, 0},
-		{"Two prices", []int{1, 5}, 4},
-	}
+	// ["RandomizedSet","insert","remove","insert","getRandom","remove","insert","getRandom"]
+	// [[],[1],[2],[2],[],[1],[2],[]]
 
-	for _, test := range maxProfitTests {
-		result := maxProfit(test.prices)
-		status := "PASS"
-		if result != test.expected {
-			status = "FAIL"
-		}
-		println(status, "-", test.name, "-> Expected:", test.expected, "Got:", result)
-	}
+	obj := Constructor()
 
-	// Test canJump function
-	println("\n=== Testing canJump function ===")
-	canJumpTests := []struct {
-		name     string
-		nums     []int
-		expected bool
-	}{
-		{"Can jump with zeros", []int{2, 0, 0}, true},
-		{"Standard success", []int{2, 3, 1, 1, 4}, true},
-		{"Blocked by zero", []int{3, 2, 1, 0, 4}, false},
-		{"Single element", []int{0}, true},
-		{"Barely making it", []int{1, 1, 1, 1}, true},
-		{"Large first jump", []int{5, 0, 0, 0, 0}, true},
-	}
+	// insert(1)
+	result1 := obj.Insert(1)
+	println("insert(1):", result1)
 
-	for _, test := range canJumpTests {
-		result := canJump(test.nums)
-		status := "PASS"
-		if result != test.expected {
-			status = "FAIL"
-		}
-		println(status, "-", test.name, "-> Expected:", test.expected, "Got:", result)
-	}
+	// remove(2)
+	result2 := obj.Remove(2)
+	println("remove(2):", result2)
 
-	// Test minJump function
-	println("\n=== Testing minJump function ===")
-	minJumpTests := []struct {
-		name     string
-		nums     []int
-		expected int
-	}{
-		{"Standard case", []int{2, 3, 1, 1, 4}, 2},
-		{"Another example", []int{2, 3, 0, 1, 4}, 2},
-		{"Single element", []int{1}, 0},
-		{"Multiple small jumps", []int{1, 1, 1, 1, 1}, 4},
-		{"One big jump", []int{5, 1, 1, 1, 1}, 1},
-		{"Mixed scenario", []int{1, 2, 3}, 2},
-	}
+	// insert(2)
+	result3 := obj.Insert(2)
+	println("insert(2):", result3)
 
-	for _, test := range minJumpTests {
-		result := minJump(test.nums)
-		status := "PASS"
-		if result != test.expected {
-			status = "FAIL"
-		}
-		println(status, "-", test.name, "-> Expected:", test.expected, "Got:", result)
-	}
+	// getRandom()
+	result4 := obj.GetRandom()
+	println("getRandom():", result4)
+
+	// remove(1)
+	result5 := obj.Remove(1)
+	println("remove(1):", result5)
+
+	// insert(2)
+	result6 := obj.Insert(2)
+	println("insert(2):", result6)
+
+	// getRandom()
+	result7 := obj.GetRandom()
+	println("getRandom():", result7)
 }
