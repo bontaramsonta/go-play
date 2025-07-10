@@ -8,13 +8,19 @@ import (
 type Queue[T comparable] interface {
 	Enqueue(val T)
 	Dequeue() *Node[T]
+	Peek() T
 }
 
+// Simple FIFO Queue with optional capacity
 type SimpleQueue[T comparable] struct {
 	head     *Node[T]
 	tail     *Node[T]
-	Length   uint
-	Capacity uint
+	length   uint
+	capacity uint
+}
+
+func (sq *SimpleQueue[T]) SetCap(cap uint) {
+	sq.capacity = cap
 }
 
 func (sq *SimpleQueue[T]) isEmpty() bool {
@@ -22,7 +28,11 @@ func (sq *SimpleQueue[T]) isEmpty() bool {
 }
 
 func (sq *SimpleQueue[T]) isFull() bool {
-	return sq.Length == sq.Capacity
+	return sq.capacity != 0 && sq.length == sq.capacity
+}
+
+func (sq *SimpleQueue[T]) Peek() T {
+	return sq.head.data
 }
 
 func (sq *SimpleQueue[T]) Enqueue(val T) {
@@ -37,7 +47,7 @@ func (sq *SimpleQueue[T]) Enqueue(val T) {
 		sq.tail.next = &newNode
 		sq.tail = &newNode
 	}
-	sq.Length++
+	sq.length++
 }
 
 func (sq *SimpleQueue[T]) Dequeue() {
@@ -45,14 +55,14 @@ func (sq *SimpleQueue[T]) Dequeue() {
 		panic("dequeue failed: queue is already empty")
 	}
 	nodeToDelete := sq.head
-	if sq.Length == 1 {
+	if sq.length == 1 {
 		sq.head = nil
 		sq.tail = nil
 	} else {
 		sq.head = sq.head.next
 		nodeToDelete.next = nil
 	}
-	sq.Length--
+	sq.length--
 }
 
 func (sq *SimpleQueue[T]) String() string {
