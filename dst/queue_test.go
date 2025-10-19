@@ -1,13 +1,11 @@
-package dst_test
+package dst
 
 import (
 	"testing"
-
-	"github.com/bontaramsonta/main/dst"
 )
 
 func TestSimpleQueue_Enqueue(t *testing.T) {
-	sq := dst.SimpleQueue[int]{}
+	sq := SimpleQueue[int]{}
 	sq.SetCap(3)
 	sq.Enqueue(1)
 	sq.Enqueue(2)
@@ -19,7 +17,7 @@ func TestSimpleQueue_Enqueue(t *testing.T) {
 }
 
 func TestSimpleQueue_Dequeue(t *testing.T) {
-	sq := dst.SimpleQueue[int]{}
+	sq := SimpleQueue[int]{}
 	sq.Enqueue(1)
 	sq.Dequeue()
 	expected := "[ ]"
@@ -29,7 +27,7 @@ func TestSimpleQueue_Dequeue(t *testing.T) {
 }
 
 func TestSimpleQueue_Peek(t *testing.T) {
-	sq := dst.SimpleQueue[int]{}
+	sq := SimpleQueue[int]{}
 	sq.Enqueue(1)
 	expected := 1
 	if got := sq.Peek(); got != expected {

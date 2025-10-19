@@ -1,29 +1,27 @@
-package dst_test
+package dst
 
 import (
 	"errors"
 	"testing"
-
-	"github.com/bontaramsonta/main/dst"
 )
 
 func TestSingleLinkedList_Length(t *testing.T) {
 	tests := []struct {
 		name     string
-		setup    func() *dst.SingleLinkedList[int]
+		setup    func() *SingleLinkedList[int]
 		expected int
 	}{
 		{
 			name: "empty list",
-			setup: func() *dst.SingleLinkedList[int] {
-				return new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				return new(SingleLinkedList[int])
 			},
 			expected: 0,
 		},
 		{
 			name: "single element",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(42)
 				return list
 			},
@@ -31,8 +29,8 @@ func TestSingleLinkedList_Length(t *testing.T) {
 		},
 		{
 			name: "three elements",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
@@ -42,8 +40,8 @@ func TestSingleLinkedList_Length(t *testing.T) {
 		},
 		{
 			name: "after deletion",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
@@ -67,20 +65,20 @@ func TestSingleLinkedList_Length(t *testing.T) {
 func TestSingleLinkedList_String(t *testing.T) {
 	tests := []struct {
 		name     string
-		setup    func() *dst.SingleLinkedList[int]
+		setup    func() *SingleLinkedList[int]
 		expected string
 	}{
 		{
 			name: "empty list",
-			setup: func() *dst.SingleLinkedList[int] {
-				return new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				return new(SingleLinkedList[int])
 			},
 			expected: "[]",
 		},
 		{
 			name: "single element",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(42)
 				return list
 			},
@@ -88,8 +86,8 @@ func TestSingleLinkedList_String(t *testing.T) {
 		},
 		{
 			name: "multiple elements",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
@@ -99,8 +97,8 @@ func TestSingleLinkedList_String(t *testing.T) {
 		},
 		{
 			name: "mixed insertions",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheBeginning(1)
 				list.InsertAtTheEnd(3)
@@ -123,36 +121,36 @@ func TestSingleLinkedList_String(t *testing.T) {
 func TestSingleLinkedList_DeleteByValue(t *testing.T) {
 	tests := []struct {
 		name          string
-		setup         func() *dst.SingleLinkedList[int]
+		setup         func() *SingleLinkedList[int]
 		deleteValue   int
 		expectedError error
 		expectedState string
 	}{
 		{
 			name: "delete from empty list",
-			setup: func() *dst.SingleLinkedList[int] {
-				return new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				return new(SingleLinkedList[int])
 			},
 			deleteValue:   1,
-			expectedError: &dst.EmptyListError{},
+			expectedError: &EmptyListError{},
 			expectedState: "[]",
 		},
 		{
 			name: "delete non-existent value",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				return list
 			},
 			deleteValue:   3,
-			expectedError: &dst.ValueNotFoundError[int]{Value: 3},
+			expectedError: &ValueNotFoundError[int]{Value: 3},
 			expectedState: "1 -> 2",
 		},
 		{
 			name: "delete first element",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
@@ -164,8 +162,8 @@ func TestSingleLinkedList_DeleteByValue(t *testing.T) {
 		},
 		{
 			name: "delete middle element",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
@@ -177,8 +175,8 @@ func TestSingleLinkedList_DeleteByValue(t *testing.T) {
 		},
 		{
 			name: "delete last element",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
@@ -190,8 +188,8 @@ func TestSingleLinkedList_DeleteByValue(t *testing.T) {
 		},
 		{
 			name: "delete only element",
-			setup: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			setup: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(42)
 				return list
 			},
@@ -276,7 +274,7 @@ func TestSingleLinkedList_Filter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			list := new(dst.SingleLinkedList[int])
+			list := new(SingleLinkedList[int])
 			for _, v := range tt.input {
 				list.InsertAtTheEnd(v)
 			}
@@ -332,7 +330,7 @@ func TestSingleLinkedList_Map(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			list := new(dst.SingleLinkedList[int])
+			list := new(SingleLinkedList[int])
 			for _, v := range tt.input {
 				list.InsertAtTheEnd(v)
 			}
@@ -405,7 +403,7 @@ func TestSingleLinkedList_Reduce(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			list := new(dst.SingleLinkedList[int])
+			list := new(SingleLinkedList[int])
 			for _, v := range tt.input {
 				list.InsertAtTheEnd(v)
 			}
@@ -421,13 +419,13 @@ func TestSingleLinkedList_Reduce(t *testing.T) {
 func TestSingleLinkedList_ComplexOperations(t *testing.T) {
 	tests := []struct {
 		name       string
-		operations func() *dst.SingleLinkedList[int]
+		operations func() *SingleLinkedList[int]
 		expected   string
 	}{
 		{
 			name: "insert at end then beginning",
-			operations: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			operations: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(2)
 				list.InsertAtTheEnd(3)
 				list.InsertAtTheBeginning(1)
@@ -437,8 +435,8 @@ func TestSingleLinkedList_ComplexOperations(t *testing.T) {
 		},
 		{
 			name: "multiple deletions",
-			operations: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			operations: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				for i := 1; i <= 5; i++ {
 					list.InsertAtTheEnd(i)
 				}
@@ -450,8 +448,8 @@ func TestSingleLinkedList_ComplexOperations(t *testing.T) {
 		},
 		{
 			name: "alternating operations",
-			operations: func() *dst.SingleLinkedList[int] {
-				list := new(dst.SingleLinkedList[int])
+			operations: func() *SingleLinkedList[int] {
+				list := new(SingleLinkedList[int])
 				list.InsertAtTheEnd(1)
 				list.InsertAtTheBeginning(0)
 				list.InsertAtTheEnd(2)
