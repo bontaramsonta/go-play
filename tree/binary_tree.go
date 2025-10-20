@@ -264,20 +264,31 @@ func (b *BinaryTree) GetMaxWidth() int {
 		return 0
 	}
 	var traversal func(value int, level int)
-	levelCount := make(map[int]int)
+	currentLevel := 0
+	currentLevelCount := 0
+	maxLevelCount := 0
 	traversal = func(value int, level int) {
-		levelCount[level]++
+		// same level
+		if level == currentLevel {
+			currentLevelCount++
+		} else {
+			// level increased
+			if currentLevelCount > maxLevelCount {
+				maxLevelCount = currentLevelCount
+			}
+			currentLevel = level
+			currentLevelCount = 1
+		}
 	}
 
 	b.levelOrder(traversal)
 
-	maxWidth := 0
-	for _, count := range levelCount {
-		if count > maxWidth {
-			maxWidth = count
-		}
+	// for the last level
+	if currentLevelCount > maxLevelCount {
+		maxLevelCount = currentLevelCount
 	}
-	return maxWidth
+
+	return maxLevelCount
 }
 
 func NewBinaryTree(rootValue int) *BinaryTree {
