@@ -14,8 +14,17 @@ func TestBinaryTree_LevelOrder(t *testing.T) {
 	tree.InsertLeft(right, 6)
 	tree.InsertRight(right, 7)
 
-	expected := []int{1, -1, 2, 3, -1, 4, 5, 6, 7}
-	result := tree.levelOrder()
+	expected := []int{1, 2, 3, 4, 5, 6, 7}
+	c := 0
+	var traversal func(value int, level int)
+	traversal = func(value int, level int) {
+		expectedValue := expected[c]
+		if value != expectedValue {
+			t.Errorf("at index %d, got %d, want %d", c, value, expectedValue)
+		}
+		c++
+	}
+	result := tree.levelOrder(traversal)
 
 	if !slices.Equal(result, expected) {
 		t.Errorf("got %v, want %v", result, expected)
@@ -140,5 +149,22 @@ func TestBinaryTreeIsBalanced(t *testing.T) {
 
 	if tree.isBalanced() {
 		t.Errorf("expected tree to be unbalanced")
+	}
+}
+
+func TestBinaryTreeMaxWidth(t *testing.T) {
+	tree := NewBinaryTree(1)
+	left := tree.InsertLeft(tree.Root(), 2)
+	right := tree.InsertRight(tree.Root(), 3)
+	tree.InsertLeft(left, 4)
+	tree.InsertRight(left, 5)
+	tree.InsertLeft(right, 6)
+	tree.InsertRight(right, 7)
+
+	expectedMaxWidth := 4
+	resultMaxWidth := tree.GetMaxWidth()
+
+	if resultMaxWidth != expectedMaxWidth {
+		t.Errorf("got max width %d, want %d", resultMaxWidth, expectedMaxWidth)
 	}
 }

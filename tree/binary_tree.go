@@ -6,12 +6,13 @@ type Tree interface {
 	Root() *Node[int]
 	InsertLeft(parent *Node[int], value int) *Node[int]
 	InsertRight(parent *Node[int], value int) *Node[int]
-	levelOrder() []int
+	levelOrder(traversal func(value int, level int)) []int
 	GetSize() int
 	GetHeight() int
+	GetMaxWidth() int
 }
 
-type PrintAbleTree interface {
+type PrintableTree interface {
 	PrintLeftView() []int
 	PrintRightView() []int
 	PrintBottomView() []int
@@ -36,7 +37,7 @@ type BinaryTree struct {
 	current int
 }
 
-func (b *BinaryTree) levelOrder() []int {
+func (b *BinaryTree) levelOrder(traversal func(value int, level int)) []int {
 	var result []int
 	if b.count != -1 {
 		result = make([]int, 0, b.count)
@@ -60,13 +61,9 @@ func (b *BinaryTree) levelOrder() []int {
 	}
 
 	queue = append(queue, QueueItem{b.root, 0})
-	previousLevel := 0
 	for i := 0; i < len(queue); i++ {
 		current := queue[i]
-		if current.level > previousLevel {
-			result = append(result, -1)
-			previousLevel = current.level
-		}
+		traversal(current.node.value, current.level)
 		result = append(result, current.node.value)
 
 		if current.node.left != nil {
@@ -260,6 +257,27 @@ func (b *BinaryTree) isBalanced() bool {
 
 	balanced, _ := checkBalance(b.root)
 	return balanced
+}
+
+func (b *BinaryTree) GetMaxWidth() int {
+	if b.root == nil {
+		return 0
+	}
+	var traversal func(value int, level int)
+	levelCount := make(map[int]int)
+	traversal = func(value int, level int) {
+		levelCount[level]++
+	}
+
+	b.levelOrder(traversal)
+
+	maxWidth := 0
+	for _, count := range levelCount {
+		if count > maxWidth {
+			maxWidth = count
+		}
+	}
+	return maxWidth
 }
 
 func NewBinaryTree(rootValue int) *BinaryTree {
